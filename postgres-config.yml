@@ -1,0 +1,9 @@
+# Archivo de configuración básica del servicio requerido para la app
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: postgres-config
+data:
+  DB_NAME: postgres
+  DB_HOST: postgres-service
+  DB_PORT: "5432"

@@ -1,0 +1,76 @@
+# Configuración del deployment del servicio
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: backend-deployment
+  labels:
+    app: backend
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: backend
+  template:
+    metadata:
+      labels:
+        app: backend
+    spec:
+      containers:
+      - name: backend
+        image: julianguerra92/teslo-shop-backend:1.1.0
+        ports:
+        - containerPort: 3000
+        env: 
+        - name: APP_VERSION
+          value: "1.1.0"
+        - name: PORT
+          value: "3000"
+        - name: STAGE
+          value: "dev"
+        - name: DB_NAME
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: DB_NAME
+        - name: DB_HOST
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: DB_HOST
+        - name: DB_PORT
+          valueFrom:
+            configMapKeyRef:
+              name: postgres-config
+              key: DB_PORT
+        - name: DB_USERNAME
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: DB_USER
+        - name: BD_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: postgres-secrets
+              key: DB_PASSWORD
+        - name: JWT_SECRET
+          valueFrom:
+            secretKeyRef:
+              name: backend-secrets
+              key: JWT_SECRET
+
+---
+
+# Configuración del servicio
+apiVersion: v1
+kind: Service
+metadata:
+  name: backend-service
+spec:
+  type: NodePort
+  selector:
+    app: backend
+  ports:
+    - protocol: TCP
+      port: 3000 #Puede ser cualquier puerto. Este es el que se expone al exterior.
+      targetPort: 3000 # Este debe hacer match con el definido en el deplyment.
+      nodePort: 30300
